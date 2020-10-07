@@ -6,6 +6,7 @@
 Name:       harbour-sailfishconnect
 
 # >> macros
+%bcond_with conan
 # << macros
 
 Summary:    SailfishOS client for KDE-Connect
@@ -33,8 +34,15 @@ BuildRequires:  cmake
 BuildRequires:  pkgconfig(python3)
 BuildRequires:  ninja
 BuildRequires:  gettext
+%if 0%{?with_conan}
 BuildRequires:  python3-setuptools
 BuildRequires:  python3-pip
+%else
+BuildRequires: kcoreaddons-devel
+BuildRequires: ki18n-devel
+BuildRequires: kconfig-devel
+BuildRequires: pkgconfig(qca2-qt5)
+%endif
 BuildRequires:  desktop-file-utils
 
 %description
@@ -70,6 +78,8 @@ if [ -f "CMakeLists.txt" ] ; then
 else 
   BUILD_DIR="."
 fi
+
+%if 0%{?with_conan}
 export CONAN_USER_HOME=`realpath "$BUILD_DIR"`
 
 # install virtualenv
@@ -91,10 +101,12 @@ if ! grep -sq sailfishos "$CONAN_USER_HOME/.conan/remotes.json" ; then
   conan remote remove conan-center
   conan remote add -f sailfishos https://api.bintray.com/conan/r1tschy/sailfishos
 fi
-
+%endif
 mkdir -p "$BUILD_DIR"
 
+%if 0%{?with_conan}
 (cd "$BUILD_DIR" && conan install "$SOURCE_DIR" --profile="$SOURCE_DIR/dev/profiles/%{_target_cpu}")
+%endif
 
 (cd "$BUILD_DIR" && cmake \
   -DCMAKE_BUILD_TYPE=$CMAKE_BUILD_TYPE \
@@ -116,7 +128,6 @@ else
   BUILD_DIR="."
 fi
 
-rm -rf %{buildroot}
 DESTDIR=%{buildroot} cmake --build "$BUILD_DIR" --target install
 rm -rf \
   %{buildroot}%{_datadir}/knotifications5 \
