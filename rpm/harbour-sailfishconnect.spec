@@ -59,8 +59,6 @@ VENV=$HOME/.venv-conan-%{_target_cpu}
 export TARGET_CPU="%{_target_cpu}"
 export SAILFISHCONNECT_PACKAGE_VERSION="%{version}-%{release}"
 
-SOURCE_DIR=`realpath %{_sourcedir}/..`
-
 if [ "$TARGET_CPU" == "i486" ] || [ "$SAILFISH_SDK_FRONTEND" == "qtcreator" ] ; then  
   GENERATOR="Unix Makefiles"
 else
@@ -116,7 +114,7 @@ mkdir -p "$BUILD_DIR"
   -DCONAN_DISABLE_CHECK_COMPILER=ON \
   -DSAILFISHOS=ON \
   -G "$GENERATOR" \
-  "$SOURCE_DIR")
+  ..)
 
 cmake --build "$BUILD_DIR" -- %{?_smp_mflags}
 
